@@ -98,13 +98,6 @@ const audienceAdvancedItems = [
   "📈 Yang mau naik level — dari sekadar bisa jadi makin mahir lewat modul lanjutan + feedback mentor.",
 ] as const;
 
-const audienceNotFitItems = [
-  "Mau hasil instan tanpa proses belajar",
-  "Tidak siap latihan konten secara konsisten",
-  "Mencari skema cepat kaya tanpa effort",
-  "Tidak mau belajar strategi digital secara bertahap",
-] as const;
-
 const instantStartCards = [
   {
     title: "🔁 Cuan Berkali-kali",
@@ -129,7 +122,7 @@ const stepCards = [
 const storeItems = [
   {
     title: "🎬 Video Affiliate Anti-Pasaran",
-    desc: "Video pendek 15-20 detik per produk, 1 video cuma jadi milik kamu (anti-pasaran). Pilih versi mentah (tinggal edit) atau siap upload (langsung posting).",
+    desc: "Video pendek 15–20 detik per produk, 1 video cuma jadi milik kamu (anti-pasaran). Pilih versi mentah (tinggal edit) atau siap upload (langsung posting).",
   },
   {
     title: "🤖 Alat Bantu AI Premium",
@@ -280,7 +273,7 @@ const Landing = () => {
             <img src="/images/logo/buatcuan-icon.png" alt="BuatCuan" className="h-7 w-7 object-contain" />
             <div className="min-w-0">
               <img src="/images/logo/buatcuan-text.png" alt="BuatCuan" className="h-5 object-contain" />
-              <p className="text-[8px] font-bold leading-tight text-muted-foreground dark:text-white/65 sm:text-[9px]">Dari nol sampai cuan — ilmunya diajarin, alatnya disediain.</p>
+              <p className="text-[10px] font-bold leading-tight text-muted-foreground dark:text-white/65 sm:text-[10px]">Dari nol sampai cuan — ilmunya diajarin, alatnya disediain.</p>
             </div>
           </Link>
           <div className="flex items-center gap-2">
@@ -391,7 +384,7 @@ const Landing = () => {
 
 function FooterContactBlock() {
   return (
-    <div className="mt-6 rounded-2xl border border-border bg-card/60 p-4 text-left text-[10px] leading-relaxed dark:border-white/10 dark:bg-white/[0.03]">
+    <div className="mt-6 rounded-2xl border border-border bg-card/60 p-4 text-left text-[11px] leading-relaxed dark:border-white/10 dark:bg-white/[0.03]">
       <p className="text-[9px] font-black uppercase tracking-[0.18em] text-primary">Kontak & Pengaduan Konsumen</p>
       <p className="mt-1 font-bold text-foreground dark:text-white/80">{legalConfig.legalEntityName}</p>
       <div className="mt-2 grid gap-1.5 sm:grid-cols-3">
@@ -580,7 +573,7 @@ function LandingSection({ id, eyebrow, title, subtitle, children }: { id?: strin
 
 function AudienceSection({ content }: { content: LandingContent }) {
   const starterItems = content.section2StarterItems?.length ? content.section2StarterItems : [...audienceStarterItems];
-  const advancedItems = content.section2AdvancedItems?.length ? content.section2AdvancedItems : [...audienceNotFitItems];
+  const advancedItems = content.section2AdvancedItems?.length ? content.section2AdvancedItems : [...audienceAdvancedItems];
   return (
     <LandingSection
       eyebrow="Ini Buat Kamu"
@@ -640,13 +633,7 @@ function AudienceSection({ content }: { content: LandingContent }) {
 }
 
 function ReasonsToStartSection({ registerUrl, content }: { registerUrl: string; content: LandingContent }) {
-  const sourceCards = content.section3Items?.length ? content.section3Items : [...instantStartCards];
-  const cards = sourceCards.length >= 4
-    ? sourceCards
-    : [
-        ...sourceCards,
-        { title: "🤝 Komunitas Support", desc: "Nggak jalan sendiri. Ada komunitas aktif buat saling bantu dan ngedorong progress." },
-      ];
+  const cards = content.section3Items?.length ? content.section3Items : [...instantStartCards];
   return (
     <LandingSection eyebrow="Langsung Mutusin" title={content.section3Title ?? "YANG LANGSUNG BIKIN KAMU PENGEN MULAI"} subtitle={content.section3Intro ?? ""}>
       <div className="space-y-3">
@@ -681,9 +668,14 @@ function ReasonsToStartSection({ registerUrl, content }: { registerUrl: string; 
 
 function ThreeStepsSection({ content }: { content: LandingContent }) {
   const cards = content.section4Items?.length ? content.section4Items : [...stepCards];
+  const stepIcons: LucideIcon[] = [Play, Sparkles, TrendingUp];
+
   return (
     <LandingSection eyebrow="3 Langkah" title={content.section4Title ?? "CUMA 3 LANGKAH, LANGSUNG JALAN"} subtitle="">
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="relative mt-1">
+        <div className="pointer-events-none absolute bottom-4 left-[1.125rem] top-4 w-px bg-border/70 dark:bg-white/15 sm:left-1/2 sm:-translate-x-1/2" />
+
+        <div className="space-y-4 sm:space-y-7">
         {cards.map((item, index) => (
           <motion.article
             key={item.title}
@@ -691,28 +683,54 @@ function ThreeStepsSection({ content }: { content: LandingContent }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.42, delay: index * 0.08 }}
-            className="rounded-2xl border border-border bg-card p-4 shadow-sm transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-white/[0.045]"
+            className="grid grid-cols-[auto_1fr] items-center gap-3 sm:grid-cols-[1fr_auto_1fr] sm:gap-4"
           >
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">STEP {index + 1}</p>
-            <h3 className="mt-2 text-sm font-black">{item.title}</h3>
-            <p className="mt-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/65">{item.desc}</p>
+            <div className="relative z-10">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-primary/45 bg-[linear-gradient(145deg,rgba(0,200,83,0.26),rgba(18,19,18,0.95))] text-[12px] font-black text-primary shadow-[0_0_22px_rgba(0,200,83,0.22)]">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+            </div>
+
+            <div
+              className={cn(
+                "rounded-2xl border border-border bg-card p-4 shadow-sm transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-white/[0.045]",
+                index % 2 === 0 ? "sm:col-start-1" : "sm:col-start-3",
+              )}
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">STEP {index + 1}</p>
+              <h3 className="mt-2 text-sm font-black sm:text-base">{item.title}</h3>
+              <p className="mt-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/65">{item.desc}</p>
+            </div>
+
+            <div
+              className={cn(
+                "hidden h-[132px] rounded-2xl border border-border bg-[radial-gradient(circle_at_30%_25%,rgba(0,200,83,0.2),transparent_55%),linear-gradient(145deg,rgba(12,14,13,0.94),rgba(8,10,9,0.98))] p-3 dark:border-white/10 sm:block",
+                index % 2 === 0 ? "sm:col-start-3" : "sm:col-start-1",
+              )}
+            >
+              <div className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-black/30">
+                {(() => {
+                  const Icon = stepIcons[index % stepIcons.length];
+                  return <Icon className="h-9 w-9 text-primary/90" />;
+                })()}
+              </div>
+            </div>
           </motion.article>
         ))}
+        </div>
       </div>
     </LandingSection>
   );
 }
 
 function StoreTeaserSection({ registerUrl, content }: { registerUrl: string; content: LandingContent }) {
-  const cards = content.section5Items?.length ? content.section5Items : [...storeItems];
-  const stepLabels = [
-    "Step 1: Bikin konten viral pake A.I",
-    "Step 2: Automatisasi pake A.I",
-    "Step 3: Monetisasi dan hasilkan cuan",
-  ];
+  const rawCards = content.section5Items?.length ? content.section5Items : [...storeItems];
+  const hasLegacyStepTitles = rawCards.some((item) => /^step\s*\d+\s*:/i.test(item.title));
+  const cards = hasLegacyStepTitles ? [...storeItems] : rawCards;
+  const topLabels = cards.slice(0, 3).map((item) => item.title);
   const stepCards = cards.slice(0, 3);
   const [activeIndex, setActiveIndex] = useState(0);
-  const activeCard = cards[activeIndex] ?? cards[0] ?? { title: stepLabels[0], desc: "" };
+  const activeCard = cards[activeIndex] ?? cards[0] ?? storeItems[0];
   const lockedCards = cards.slice(3);
 
   return (
@@ -723,9 +741,9 @@ function StoreTeaserSection({ registerUrl, content }: { registerUrl: string; con
     >
       <div className="space-y-3">
         <div className="grid gap-2 sm:grid-cols-3">
-          {stepLabels.map((step, idx) => (
+          {topLabels.map((label, idx) => (
             <button
-              key={step}
+              key={label}
               type="button"
               onClick={() => setActiveIndex(idx)}
               className={cn(
@@ -736,7 +754,7 @@ function StoreTeaserSection({ registerUrl, content }: { registerUrl: string; con
               )}
               aria-pressed={idx === activeIndex}
             >
-              {step}
+              {label}
             </button>
           ))}
         </div>
@@ -753,18 +771,13 @@ function StoreTeaserSection({ registerUrl, content }: { registerUrl: string; con
               <div className="grid gap-3 sm:grid-cols-[0.62fr_1.38fr]">
                 <div className="aspect-[3/4] rounded-lg border border-white/10 bg-black/40" />
                 <div className="rounded-lg border border-white/10 bg-black/45 p-3">
-                  <p className="text-xl font-black leading-tight text-white sm:text-2xl">Apa tujuan mereka?</p>
-                  <ul className="mt-2 space-y-1.5 text-[12px] font-semibold text-white/78">
-                    <li>1. Mereka maunya apa?</li>
-                    <li>2. Pengen ada di posisi yang gimana?</li>
-                    <li>3. Mimpinya pengen jadi siapa?</li>
-                    <li>4. Akhirnya pengen jadi orang seperti apa?</li>
-                  </ul>
+                  <p className="text-xl font-black leading-tight text-white sm:text-2xl">{activeCard.title || storeItems[0].title}</p>
+                  <p className="mt-2 text-[12px] font-semibold leading-relaxed text-white/78">{activeCard.desc || storeItems[0].desc}</p>
                 </div>
               </div>
             </div>
-            <h3 className="mt-3 text-2xl font-black leading-tight sm:text-4xl">{activeCard.title || "Bikin Konten Viral Pake A.I"}</h3>
-            <p className="mt-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/65">{activeCard.desc || "Materi dimulai dari fondasi supaya konten kamu punya arah dan tujuan yang jelas."}</p>
+            <h3 className="mt-3 text-2xl font-black leading-tight sm:text-4xl">{content.section5Title ?? "TOKO BUATCUAN — TINGGAL PILIH SESUAI KEBUTUHAN, LANGSUNG GAS"}</h3>
+            <p className="mt-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/65">{content.section5Intro ?? "Tiap yang kamu pelajarin, ada bekal siap pakainya di Toko BuatCuan — biar kamu gas lebih cepat, nggak mulai dari kosong:"}</p>
           </motion.article>
 
           <motion.aside
@@ -804,7 +817,7 @@ function StoreTeaserSection({ registerUrl, content }: { registerUrl: string; con
         </div>
       </div>
       <p className="mt-4 text-center text-[11px] font-semibold leading-relaxed text-muted-foreground dark:text-white/62">
-        {content.section5Note ?? "Teaser aja — harga & detail dibuka di dalam setelah daftar. CTA tetap Daftar GRATIS, jangan ada tombol beli di home. Item lain tampil di dalam setelah daftar."}
+        {content.section5Note ?? "Teaser aja — harga & detail dibuka di dalam setelah daftar. CTA tetap Daftar GRATIS, jangan ada tombol beli di home. Item lain (buku fisik, dll.) tampil di dalam setelah daftar."}
       </p>
       <div className="mt-4 flex justify-center">
         <Link to={registerUrl} className="rounded-full bg-primary px-5 py-2.5 text-xs font-black text-black">{content.section5Cta ?? "Daftar GRATIS"}</Link>
@@ -833,11 +846,9 @@ function FreeFirstSection({ content }: { content: LandingContent }) {
               <div className={cn(idx % 2 === 0 ? "sm:order-1" : "sm:order-2")}>
                 <p className="text-5xl font-black leading-none text-accent">{String(idx + 1).padStart(2, "0")}</p>
                 <h3 className="mt-2 text-2xl font-black leading-tight sm:text-3xl">{item}</h3>
-                <p className="mt-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/66">
-                  Fasilitas ini aktif setelah gabung member, biar kamu bisa langsung praktik dan jalan lebih cepat.
-                </p>
+                <p className="mt-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/66">Benefit ini mengikuti paket dan materi sesuai briefing di landing.</p>
                 <span className="mt-3 inline-flex rounded-full border border-primary/35 bg-primary/12 px-3 py-1 text-[10px] font-black text-primary">
-                  Senilai benefit premium
+                  Benefit Member
                 </span>
               </div>
               <div className={cn("relative overflow-hidden rounded-xl border border-border bg-[linear-gradient(145deg,rgba(0,200,83,0.15),rgba(255,215,0,0.1)_50%,rgba(8,10,9,0.94)_100%)] p-2 dark:border-white/10", idx % 2 === 0 ? "sm:order-2" : "sm:order-1")}>
