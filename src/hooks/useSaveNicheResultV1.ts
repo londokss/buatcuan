@@ -5,6 +5,6 @@ import { api } from "@/lib/api";
 // the score preview used, so the saved result can never diverge from what was shown on screen.
 export function useSaveNicheResultV1() {
   return useMutation({
-    mutationFn: api.nicheV1.saveResult,
+    mutationFn: (payload) => api.nicheV1.saveResult(payload),
   });
 }

@@ -61,7 +61,13 @@ const AdminLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background text-sm font-semibold text-muted-foreground">
+        Memuat dashboard admin...
+      </div>
+    );
+  }
   if (!user) return <Navigate to="/login" replace />;
   if (user.role !== "admin") return <Navigate to="/app" replace />;
 

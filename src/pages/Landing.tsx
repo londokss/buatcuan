@@ -22,6 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ThemeModeToggle } from "@/components/ThemeModeToggle";
 import { useApp } from "@/context/AppContext";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useSeo } from "@/hooks/useSeo";
 import { api, assetUrl, type LandingContent, type LandingTestimonial } from "@/lib/api";
 import { legalConfig } from "@/data/legal";
 import { cn } from "@/lib/utils";
@@ -247,6 +248,16 @@ const Landing = () => {
     staleTime: 60_000,
   });
   const content = normalizeLandingContent(landingContent);
+  const canonicalPath = slug ? `/l/${slug}` : "/";
+
+  useSeo({
+    title: "BuatCuan — Dari 0 Sampai Menghasilkan di Internet",
+    description:
+      "Belajar bisnis digital, affiliate marketing, dan monetisasi konten secara step-by-step dari nol bersama BuatCuan.",
+    path: canonicalPath,
+    type: "website",
+  });
+
   const infoIconMap: Record<string, LucideIcon> = {
     video: Video,
     Video,
@@ -270,9 +281,23 @@ const Landing = () => {
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl dark:border-white/10 dark:bg-[#020402]/80">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-2">
-            <img src="/images/logo/buatcuan-icon.png" alt="BuatCuan" className="h-7 w-7 object-contain" />
+            <img
+              src="/images/logo/buatcuan-icon.png"
+              alt="BuatCuan"
+              width={28}
+              height={28}
+              decoding="async"
+              className="h-7 w-7 object-contain"
+            />
             <div className="min-w-0">
-              <img src="/images/logo/buatcuan-text.png" alt="BuatCuan" className="h-5 object-contain" />
+              <img
+                src="/images/logo/buatcuan-text.png"
+                alt="BuatCuan"
+                width={132}
+                height={20}
+                decoding="async"
+                className="h-5 object-contain"
+              />
               <p className="text-[10px] font-bold leading-tight text-muted-foreground dark:text-white/65 sm:text-[10px]">Dari nol sampai cuan — ilmunya diajarin, alatnya disediain.</p>
             </div>
           </Link>
@@ -358,7 +383,7 @@ const Landing = () => {
       <footer className="relative border-t border-border bg-background py-8 text-center text-[11px] font-semibold text-muted-foreground dark:border-white/10 dark:bg-[#020402] dark:text-white/42">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="rounded-2xl border border-yellow-500/25 bg-yellow-500/5 px-4 py-3 text-[10px] leading-relaxed text-yellow-800 dark:border-yellow-400/25 dark:bg-yellow-400/[0.06] dark:text-yellow-200/80">
-            {content.footerDisclaimer ?? "Hasil tiap orang berbeda tergantung praktik, konsistensi, kualitas konten & respons audiens. Ini bukan janji hasil instan. Komisi berpotensi, bukan dijamin."}
+            {content.footerDisclaimer ?? "Hasil tiap orang berbeda tergantung praktik & konsistensi. Bukan janji hasil instan. Komisi berpotensi, bukan dijamin."}
           </div>
 
           <div className="mt-4">{content.footerCopyright ?? "© PT Akademi BuatCuan Indonesia"}</div>
@@ -367,6 +392,7 @@ const Landing = () => {
             <Link to="/privacy" className="hover:text-foreground dark:hover:text-white">Kebijakan Privasi</Link>
             <Link to="/refund-policy" className="hover:text-foreground dark:hover:text-white">Kebijakan Refund</Link>
             <Link to="/affiliate-rules" className="hover:text-foreground dark:hover:text-white">Aturan Affiliate/Komisi</Link>
+            <Link to="/faq" className="hover:text-foreground dark:hover:text-white">FAQ</Link>
           </nav>
 
           <FooterContactBlock />
@@ -939,6 +965,10 @@ function StartNowSection({ registerUrl, content }: { registerUrl: string; conten
           </Link>
         </article>
       </div>
+      <div className="mx-auto mt-3 max-w-5xl rounded-2xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-center text-[11px] font-semibold leading-relaxed text-yellow-900 dark:border-yellow-400/30 dark:bg-yellow-400/[0.08] dark:text-yellow-200">
+        <p>Contoh hitungan, bukan janji. Hasil tiap orang berbeda, komisi berpotensi, bukan dijamin.</p>
+        <p className="mt-1">Link referral yang kamu bagikan adalah link komisi dari pembelian produk belajar, bukan dari merekrut mentor/affiliate baru.</p>
+      </div>
     </LandingSection>
   );
 }
@@ -1111,7 +1141,7 @@ function TestimonialsSection({ content }: { content: LandingContent }) {
   return (
     <LandingSection eyebrow="Bukti Member" title={content.testimonialsTitle || "Contoh skenario member"} subtitle="Ilustrasi cara mentor/member memakai BuatCuan — bukan klaim hasil yang pasti didapat semua orang.">
       <div className="mb-4 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-center text-[11px] font-black text-yellow-800 dark:border-yellow-400/30 dark:bg-yellow-400/10 dark:text-yellow-200">
-        Contoh skenario, bukan testimoni nyata. Hasil tiap orang berbeda, bukan jaminan.
+        Contoh hitungan, bukan janji. Hasil tiap orang berbeda, komisi berpotensi.
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         {content.testimonials.map((item) => (

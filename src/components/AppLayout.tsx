@@ -21,7 +21,13 @@ const AppLayout = () => {
     refetchInterval: 60_000,
   });
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background text-sm font-semibold text-muted-foreground">
+        Memuat aplikasi...
+      </div>
+    );
+  }
   if (!user) return <Navigate to="/login" replace />;
   if (user.role === "admin") return <Navigate to="/admin" replace />;
   const showNavigation = true;

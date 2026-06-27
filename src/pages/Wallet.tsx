@@ -143,7 +143,11 @@ const Wallet = () => {
         </div>
         <div className="relative mt-7">
           <p className="text-xs text-muted-foreground">Saldo tersedia</p>
-          <p data-testid="wallet-balance" className="mt-1 break-words text-[2rem] font-black leading-none tracking-tight text-foreground">{formatIDR(balance)}</p>
+          {isLoading ? (
+            <div className="mt-2 h-10 w-40 animate-pulse rounded-xl bg-muted" />
+          ) : (
+            <p data-testid="wallet-balance" className="mt-1 break-words text-[2rem] font-black leading-none tracking-tight text-foreground">{formatIDR(balance)}</p>
+          )}
         </div>
         <div className="relative mt-7 grid grid-cols-2 gap-3 text-xs">
           <div>

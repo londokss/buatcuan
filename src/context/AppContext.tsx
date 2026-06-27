@@ -9,7 +9,7 @@ type ActionResult = { success: boolean; message?: string };
 interface AppState {
   user: User | null;
   loading: boolean;
-  login: (wa: string, password: string, remember?: boolean) => Promise<ActionResult>;
+  login: (wa: string, password: string, remember?: boolean) => Promise<ActionResult & { user?: ApiUser }>;
   register: (data: { name: string; wa: string; password: string; referral?: string; termsAccepted: boolean }) => Promise<ActionResult & { user?: ApiUser }>;
   logout: () => void;
   activateMembership: (planId: string, paymentMethod: string, paymentProvider?: string) => Promise<ActionResult & { checkoutUrl?: string; provider?: string; payment?: PaymentDto }>;
@@ -42,7 +42,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const refreshUser = useCallback(async () => {
-    if (!authStorage.getToken()) {
+    const tokenAtStart = authStorage.getToken();
+    if (!tokenAtStart) {
       syncUser(null);
       setLoading(false);
       return;
@@ -50,10 +51,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const { user: freshUser } = await api.auth.me();
-      syncUser(freshUser);
+      // Avoid overriding a newer session if token changed while request was in flight.
+      if (authStorage.getToken() === tokenAtStart) {
+        syncUser(freshUser);
+      }
     } catch {
-      authStorage.clear();
-      setUser(null);
+      // Only clear if the failing request still corresponds to current token.
+      if (authStorage.getToken() === tokenAtStart) {
+        authStorage.clear();
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -68,7 +75,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const session = await api.auth.login({ wa, password });
       authStorage.setSession(session.token, session.user, remember);
       setUser(session.user);
-      return { success: true };
+      return { success: true, user: session.user };
     } catch (error) {
       return {
         success: false,

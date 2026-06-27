@@ -12,7 +12,7 @@ import { normalizeIndonesianPhoneNumber } from "@/lib/phone";
 import { toast } from "sonner";
 import { ThemeModeToggle } from "@/components/ThemeModeToggle";
 import { BackButton } from "@/components/BackButton";
-import { api, assetUrl, authStorage, type UsageVideoDto } from "@/lib/api";
+import { api, assetUrl, type UsageVideoDto } from "@/lib/api";
 import { VerticalMediaViewer, type VerticalMediaItem } from "@/components/VerticalMediaViewer";
 import { cn } from "@/lib/utils";
 
@@ -65,7 +65,7 @@ const Login = () => {
     setSubmitting(false);
     if (result.success) {
       toast.success("Selamat datang kembali!");
-      const role = authStorage.getUser()?.role ?? "member";
+      const role = result.user?.role ?? "member";
       nav(role === "admin" ? "/admin" : "/app");
     } else toast.error(result.message ?? "Cek lagi data kamu ya");
   };
