@@ -20,13 +20,39 @@ interface AppState {
 
 const Ctx = createContext<AppState | null>(null);
 
+function sanitizeUser(input: ApiUser | null): ApiUser | null {
+  if (!input) return null;
+
+  const completedLessons = Array.isArray(input.completedLessons)
+    ? input.completedLessons.filter((id): id is string => typeof id === "string")
+    : [];
+
+  return {
+    ...input,
+    id: typeof input.id === "string" ? input.id : "",
+    name: typeof input.name === "string" && input.name.trim() ? input.name : "Member",
+    wa: typeof input.wa === "string" ? input.wa : "",
+    referral: typeof input.referral === "string" ? input.referral : "",
+    myRefCode: typeof input.myRefCode === "string" ? input.myRefCode : "",
+    role: typeof input.role === "string" && input.role.trim() ? input.role : "member",
+    membershipActive: Boolean(input.membershipActive),
+    membershipExpiry: typeof input.membershipExpiry === "string" ? input.membershipExpiry : "",
+    autoRenewMembership: Boolean(input.autoRenewMembership),
+    joinedAt: typeof input.joinedAt === "string" ? input.joinedAt : "",
+    balance: Number.isFinite(Number(input.balance)) ? Number(input.balance) : 0,
+    level: typeof input.level === "string" && input.level.trim() ? input.level : "Beginner",
+    completedLessons,
+  };
+}
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(() => authStorage.getUser());
+  const [user, setUser] = useState<User | null>(() => sanitizeUser(authStorage.getUser()));
   const [loading, setLoading] = useState(true);
 
   const syncUser = useCallback((nextUser: User | null) => {
-    setUser(nextUser);
-    if (nextUser) authStorage.setUser(nextUser);
+    const safeUser = sanitizeUser(nextUser);
+    setUser(safeUser);
+    if (safeUser) authStorage.setUser(safeUser);
   }, []);
 
   useEffect(() => {
@@ -73,9 +99,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const login: AppState["login"] = async (wa, password, remember = true) => {
     try {
       const session = await api.auth.login({ wa, password });
-      authStorage.setSession(session.token, session.user, remember);
-      setUser(session.user);
-      return { success: true, user: session.user };
+      const safeUser = sanitizeUser(session.user);
+      if (!safeUser) {
+        return { success: false, message: "Sesi login tidak valid. Coba login ulang." };
+      }
+      authStorage.setSession(session.token, safeUser, remember);
+      setUser(safeUser);
+      return { success: true, user: safeUser };
     } catch (error) {
       return {
         success: false,
