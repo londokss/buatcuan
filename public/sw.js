@@ -1,4 +1,4 @@
-const CACHE_VERSION = "buatcuan-pwa-v1";
+const CACHE_VERSION = "buatcuan-pwa-v2";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -40,7 +40,17 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (url.origin === self.location.origin && isStaticAsset(request)) {
+    if (request.destination === "script" || request.destination === "style" || request.destination === "worker") {
+      event.respondWith(networkFirstAsset(request));
+      return;
+    }
     event.respondWith(cacheFirst(request));
+  }
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
   }
 });
 
@@ -83,4 +93,19 @@ async function cacheFirst(request) {
     cache.put(request, response.clone());
   }
   return response;
+}
+
+async function networkFirstAsset(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(RUNTIME_CACHE);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    throw new Error("Asset fetch failed and no cache available");
+  }
 }
