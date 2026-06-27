@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">BuatCuan</title>
+  <desc id="desc">Platform belajar bisnis digital dan affiliate marketing untuk pemula.</desc>
+  <rect width="1200" height="630" fill="#0f0f0f"/>
+  <circle cx="1010" cy="90" r="260" fill="#00c853" opacity="0.18"/>
+  <circle cx="160" cy="540" r="220" fill="#ffd700" opacity="0.12"/>
+  <rect x="80" y="82" width="1040" height="466" rx="36" fill="#151515" stroke="#2a2a2a"/>
+  <text x="120" y="190" fill="#00c853" font-family="Arial, sans-serif" font-size="44" font-weight="700">BuatCuan</text>
+  <text x="120" y="295" fill="#ffffff" font-family="Arial, sans-serif" font-size="68" font-weight="800">Dari 0 Sampai</text>
+  <text x="120" y="375" fill="#ffffff" font-family="Arial, sans-serif" font-size="68" font-weight="800">Menghasilkan di Internet</text>
+  <text x="120" y="455" fill="#b8b8b8" font-family="Arial, sans-serif" font-size="30">Belajar affiliate marketing, bisnis digital, dan monetisasi konten.</text>
+  <rect x="120" y="490" width="252" height="56" rx="28" fill="#00c853"/>
+  <text x="156" y="527" fill="#0f0f0f" font-family="Arial, sans-serif" font-size="24" font-weight="700">Mulai Belajar</text>
+</svg>

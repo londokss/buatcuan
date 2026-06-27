@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="180" viewBox="0 0 720 180" role="img" aria-labelledby="title desc">
+  <title id="title">BuatCuan Logo</title>
+  <desc id="desc">Logo horizontal BuatCuan untuk platform belajar bisnis digital.</desc>
+  <defs>
+    <linearGradient id="mark" x1="22" y1="18" x2="148" y2="156" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00C853"/>
+      <stop offset="1" stop-color="#00FF7A"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="54" y1="40" x2="122" y2="130" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE86A"/>
+      <stop offset="1" stop-color="#FFB800"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="160" height="160" rx="38" fill="#0D0D0D"/>
+  <rect x="24" y="24" width="132" height="132" rx="30" fill="url(#mark)"/>
+  <path d="M56 122V58h43c18 0 30 9 30 23 0 9-5 16-14 20 11 4 17 12 17 22 0 16-13 25-34 25H56Zm25-39h18c6 0 9-3 9-8s-3-8-9-8H81v16Zm0 39h20c7 0 10-3 10-8 0-6-3-9-10-9H81v17Z" fill="#091109"/>
+  <path d="M111 43c-5 0-9 4-9 9v9H88v-9c0-5-4-9-9-9s-9 4-9 9v9H58c-5 0-8 4-8 8s3 8 8 8h12v9H58c-5 0-8 4-8 8s3 8 8 8h12v9c0 5 4 9 9 9s9-4 9-9v-9h14v9c0 5 4 9 9 9s9-4 9-9v-9h7c5 0 8-4 8-8s-3-8-8-8h-7v-9h7c5 0 8-4 8-8s-3-8-8-8h-7v-9c0-5-4-9-9-9Zm-23 34h14v9H88v-9Z" fill="url(#gold)"/>
+  <text x="200" y="82" fill="#FFFFFF" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="54" font-weight="800">Buat</text>
+  <text x="322" y="82" fill="#00E86B" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="54" font-weight="800">Cuan</text>
+  <text x="202" y="122" fill="#A6A6A6" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="22" font-weight="600">Belajar digital. Praktek. Menghasilkan.</text>
+</svg>

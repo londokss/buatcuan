@@ -1,0 +1,48 @@
+name: Deploy frontend to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Upload new build to a fresh remote folder
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          source: "dist/*"
+          target: "/var/www/buat-cuan-hub/build-new"
+          strip_components: 1
+          overwrite: true
+
+      - name: Swap into place and reload nginx
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd /var/www/buat-cuan-hub
+            rm -rf build-old
+            mv build build-old
+            mv build-new build
+            nginx -t
+            systemctl reload nginx

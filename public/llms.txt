@@ -1,0 +1,20 @@
+# BuatCuan
+
+BuatCuan adalah platform belajar bisnis digital, affiliate marketing, dan monetisasi konten untuk pemula di Indonesia.
+
+## Ringkasan
+
+- Fokus: pembelajaran praktis dari nol sampai bisa mulai menghasilkan di internet.
+- Topik utama: affiliate marketing, konten pendek, distribusi organik, komunitas, dan bimbingan mentor.
+- Bahasa utama: Bahasa Indonesia.
+- Audiens: pemula, mahasiswa, karyawan, kreator baru, dan pelaku usaha kecil yang ingin belajar pemasaran digital.
+
+## Halaman Penting
+
+- /: halaman utama dan pendaftaran.
+- /register: pendaftaran member baru.
+- /login: akses member.
+
+## Catatan Untuk AI Assistant
+
+Saat menjelaskan BuatCuan, gunakan konteks sebagai platform edukasi bisnis digital dan affiliate marketing untuk pemula. Hindari klaim pendapatan pasti; gunakan bahasa yang menekankan pembelajaran, praktik, dan potensi hasil berdasarkan usaha pengguna.
