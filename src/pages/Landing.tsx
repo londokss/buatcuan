@@ -7,6 +7,7 @@ import {
   Crown,
   Mail,
   MapPin,
+  Lock,
   Phone,
   Play,
   Sparkles,
@@ -95,6 +96,13 @@ const audienceAdvancedItems = [
   "📹 Affiliate & kreator aktif — butuh amunisi siap pakai: video affiliate, footage, & alat AI biar makin cepet dan nggak abis ide.",
   "🛍️ Punya produk / pelaku UMKM — mau produknya makin laku lewat konten.",
   "📈 Yang mau naik level — dari sekadar bisa jadi makin mahir lewat modul lanjutan + feedback mentor.",
+] as const;
+
+const audienceNotFitItems = [
+  "Mau hasil instan tanpa proses belajar",
+  "Tidak siap latihan konten secara konsisten",
+  "Mencari skema cepat kaya tanpa effort",
+  "Tidak mau belajar strategi digital secara bertahap",
 ] as const;
 
 const instantStartCards = [
@@ -291,7 +299,7 @@ const Landing = () => {
       </header>
 
       <main className="relative pb-24 md:pb-0">
-        <section className="relative isolate flex min-h-svh w-full items-center overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
+        <section className="relative isolate flex min-h-svh w-full items-center overflow-hidden px-4 py-24 sm:px-6 sm:py-20 lg:px-8">
           {HOME_V2_ENABLED ? <HeroBackgroundMedia videoUrl={content.heroVideoUrl} posterUrl={content.heroVideoPoster} /> : null}
           <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:gap-10">
             <motion.div
@@ -333,7 +341,7 @@ const Landing = () => {
 
         <LandingSection id="video-demo" eyebrow="Video Demo" title="Lihat Cara Kerjanya" subtitle="Tonton gambaran singkat onboarding biar kamu paham alur belajar, konten, dan cara cuannya.">
           <LandingDemoVideoCard content={content} />
-          <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
             {(content.infoCards ?? []).slice(0, 3).map((item) => (
               <InfoCard key={`${item.title}-${item.desc}`} icon={infoIconMap[item.icon] ?? Sparkles} title={item.title} desc={item.desc} />
             ))}
@@ -344,9 +352,10 @@ const Landing = () => {
         <ReasonsToStartSection registerUrl={registerUrl} content={content} />
         <ThreeStepsSection content={content} />
         <StoreTeaserSection registerUrl={registerUrl} content={content} />
-        <FreeFirstSection content={content} />
-        <RecurringSection content={content} />
         <DifferenceSection content={content} />
+        <RecurringSection content={content} />
+        <TestimonialsSection content={content} />
+        <FreeFirstSection content={content} />
         <ConcernsSection content={content} />
         <StartNowSection registerUrl={registerUrl} content={content} />
         <FaqSection content={content} />
@@ -557,8 +566,8 @@ function HeroPhoneMockup({ content, registerUrl }: { content: LandingContent; re
 function LandingSection({ id, eyebrow, title, subtitle, children }: { id?: string; eyebrow: string; title: string; subtitle: string; children: ReactNode }) {
   return (
     <section id={id} className="scroll-mt-12 border-t border-border bg-background dark:border-white/10 dark:bg-[#020402]">
-      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <div className="mb-7 text-center">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-18 lg:px-8 lg:py-20">
+        <div className="mb-6 text-center sm:mb-7">
           <p className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">{eyebrow}</p>
           <h2 className="mt-2 text-2xl font-black leading-tight">{title}</h2>
           <p className="mx-auto mt-2 max-w-2xl text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/52 sm:text-sm">{subtitle}</p>
@@ -571,42 +580,57 @@ function LandingSection({ id, eyebrow, title, subtitle, children }: { id?: strin
 
 function AudienceSection({ content }: { content: LandingContent }) {
   const starterItems = content.section2StarterItems?.length ? content.section2StarterItems : [...audienceStarterItems];
-  const advancedItems = content.section2AdvancedItems?.length ? content.section2AdvancedItems : [...audienceAdvancedItems];
+  const advancedItems = content.section2AdvancedItems?.length ? content.section2AdvancedItems : [...audienceNotFitItems];
   return (
     <LandingSection
       eyebrow="Ini Buat Kamu"
       title={content.section2Title ?? "INI BUAT KAMU YANG PENGEN CUAN DARI HP"}
       subtitle={content.section2Intro ?? "Dari yang baru mulai sampai yang udah jalan — semua ada tempatnya. Soalnya di BuatCuan ada dua hal sekaligus: ilmu buat belajar dari nol, dan produk + alat buat yang pengen gas lebih cepet."}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
-        <motion.article
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.42 }}
-          className="rounded-2xl border border-border bg-card p-4 shadow-[0_16px_40px_-28px_rgba(0,0,0,0.4)] transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-white/[0.045]"
-        >
-          <h3 className="text-sm font-black text-primary">{content.section2StarterTitle ?? "🌱 Buat yang baru mulai:"}</h3>
-          <div className="mt-3 space-y-2">
-            {starterItems.map((item) => (
-              <p key={item} className="text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/65">{item}</p>
-            ))}
-          </div>
-        </motion.article>
-        <motion.article
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.42, delay: 0.08 }}
-          className="rounded-2xl border border-yellow-500/35 bg-yellow-500/10 p-4 shadow-[0_16px_40px_-28px_rgba(250,204,21,0.5)] transition-transform duration-300 hover:-translate-y-1 dark:border-yellow-400/35 dark:bg-yellow-400/10"
-        >
-          <h3 className="text-sm font-black text-yellow-700 dark:text-yellow-300">{content.section2AdvancedTitle ?? "🚀 Buat yang udah jalan / mau makin jago:"}</h3>
-          <div className="mt-3 space-y-2">
-            {advancedItems.map((item) => (
-              <p key={item} className="text-[12px] font-semibold leading-relaxed text-yellow-800/90 dark:text-yellow-100">{item}</p>
-            ))}
-          </div>
-        </motion.article>
+      <div className="rounded-3xl border border-border bg-[radial-gradient(circle_at_top,rgba(0,200,83,0.12),transparent_52%)] p-3 dark:border-white/10">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <motion.article
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.42 }}
+            className="rounded-2xl border border-primary/35 bg-card/95 p-4 shadow-[0_20px_60px_-36px_rgba(0,200,83,0.55)] dark:bg-[#090f0b]"
+          >
+            <h3 className="flex items-center gap-2 text-xl font-black text-primary">
+              Beli Jika
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs">✓</span>
+            </h3>
+            <div className="mt-3 divide-y divide-border dark:divide-white/10">
+              {starterItems.map((item) => (
+                <div key={item} className="flex items-start gap-2 py-2.5">
+                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-primary/45 bg-primary/10 text-[10px] font-black text-primary">✓</span>
+                  <p className="text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/72">{item}</p>
+                </div>
+              ))}
+            </div>
+          </motion.article>
+
+          <motion.article
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.42, delay: 0.08 }}
+            className="rounded-2xl border border-accent/35 bg-card/95 p-4 shadow-[0_20px_60px_-36px_rgba(245,158,11,0.45)] dark:bg-[#0f0c07]"
+          >
+            <h3 className="flex items-center gap-2 text-xl font-black text-accent">
+              Jangan Beli Jika
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-accent/40 bg-accent/10 text-xs">✕</span>
+            </h3>
+            <div className="mt-3 divide-y divide-border dark:divide-white/10">
+              {advancedItems.map((item) => (
+                <div key={item} className="flex items-start gap-2 py-2.5">
+                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-accent/45 bg-accent/10 text-[10px] font-black text-accent">✕</span>
+                  <p className="text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/72">{item}</p>
+                </div>
+              ))}
+            </div>
+          </motion.article>
+        </div>
       </div>
       <p className="mt-4 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-center text-[12px] font-black text-primary">
         {content.section2Outro ?? "Modal cukup 1 HP + internet — mulai dari GRATIS, naik level kapan kamu siap."}
@@ -616,10 +640,16 @@ function AudienceSection({ content }: { content: LandingContent }) {
 }
 
 function ReasonsToStartSection({ registerUrl, content }: { registerUrl: string; content: LandingContent }) {
-  const cards = content.section3Items?.length ? content.section3Items : [...instantStartCards];
+  const sourceCards = content.section3Items?.length ? content.section3Items : [...instantStartCards];
+  const cards = sourceCards.length >= 4
+    ? sourceCards
+    : [
+        ...sourceCards,
+        { title: "🤝 Komunitas Support", desc: "Nggak jalan sendiri. Ada komunitas aktif buat saling bantu dan ngedorong progress." },
+      ];
   return (
     <LandingSection eyebrow="Langsung Mutusin" title={content.section3Title ?? "YANG LANGSUNG BIKIN KAMU PENGEN MULAI"} subtitle={content.section3Intro ?? ""}>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="space-y-3">
         {cards.map((item, idx) => (
           <motion.article
             key={item.title}
@@ -627,10 +657,18 @@ function ReasonsToStartSection({ registerUrl, content }: { registerUrl: string; 
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.42, delay: idx * 0.07 }}
-            className="rounded-2xl border border-border bg-card p-4 shadow-sm transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-white/[0.045]"
+            className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-white/[0.045] sm:p-5"
           >
-            <h3 className="text-sm font-black">{item.title}</h3>
-            <p className="mt-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/65">{item.desc}</p>
+            <span className="pointer-events-none absolute -bottom-3 left-3 text-5xl font-black leading-none text-foreground/10">{String(idx + 1).padStart(2, "0")}</span>
+            <div className="grid gap-3 sm:grid-cols-[0.95fr_1.05fr] sm:items-center">
+              <div className="relative overflow-hidden rounded-xl border border-border bg-[linear-gradient(150deg,rgba(0,200,83,0.18),rgba(255,215,0,0.1)_50%,rgba(7,10,9,0.95)_100%)] p-2 dark:border-white/10">
+                <div className="aspect-[16/10] rounded-lg border border-white/10 bg-black/40" />
+              </div>
+              <div>
+                <h3 className="text-base font-black leading-tight sm:text-xl">{item.title}</h3>
+                <p className="mt-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/65">{item.desc}</p>
+              </div>
+            </div>
           </motion.article>
         ))}
       </div>
@@ -667,26 +705,103 @@ function ThreeStepsSection({ content }: { content: LandingContent }) {
 
 function StoreTeaserSection({ registerUrl, content }: { registerUrl: string; content: LandingContent }) {
   const cards = content.section5Items?.length ? content.section5Items : [...storeItems];
+  const stepLabels = [
+    "Step 1: Bikin konten viral pake A.I",
+    "Step 2: Automatisasi pake A.I",
+    "Step 3: Monetisasi dan hasilkan cuan",
+  ];
+  const stepCards = cards.slice(0, 3);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeCard = cards[activeIndex] ?? cards[0] ?? { title: stepLabels[0], desc: "" };
+  const lockedCards = cards.slice(3);
+
   return (
     <LandingSection
       eyebrow="Toko BuatCuan"
       title={content.section5Title ?? "TOKO BUATCUAN — TINGGAL PILIH SESUAI KEBUTUHAN, LANGSUNG GAS"}
       subtitle={content.section5Intro ?? "Tiap yang kamu pelajarin, ada bekal siap pakainya di Toko BuatCuan — biar kamu gas lebih cepat, nggak mulai dari kosong:"}
     >
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {cards.map((item, idx) => (
+      <div className="space-y-3">
+        <div className="grid gap-2 sm:grid-cols-3">
+          {stepLabels.map((step, idx) => (
+            <button
+              key={step}
+              type="button"
+              onClick={() => setActiveIndex(idx)}
+              className={cn(
+                "rounded-xl border px-3 py-2 text-center text-[11px] font-black transition-colors sm:text-xs",
+                idx === activeIndex
+                  ? "border-primary/45 bg-primary/15 text-primary"
+                  : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground dark:border-white/10 dark:bg-white/[0.03] dark:text-white/62 dark:hover:text-white",
+              )}
+              aria-pressed={idx === activeIndex}
+            >
+              {step}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr]">
           <motion.article
-            key={item.title}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.38, delay: idx * 0.05 }}
-            className="rounded-2xl border border-border bg-card p-4 transition-transform duration-300 hover:-translate-y-1 hover:border-primary/35 dark:border-white/10 dark:bg-white/[0.045]"
+            transition={{ duration: 0.38 }}
+            className="overflow-hidden rounded-2xl border border-border bg-card p-3 dark:border-white/10 dark:bg-white/[0.045]"
           >
-            <h3 className="text-sm font-black">{item.title}</h3>
-            <p className="mt-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/65">{item.desc}</p>
+            <div className="rounded-xl border border-border bg-[linear-gradient(150deg,rgba(0,200,83,0.16),rgba(255,215,0,0.1)_45%,rgba(7,10,9,0.94)_100%)] p-3 dark:border-white/10">
+              <div className="grid gap-3 sm:grid-cols-[0.62fr_1.38fr]">
+                <div className="aspect-[3/4] rounded-lg border border-white/10 bg-black/40" />
+                <div className="rounded-lg border border-white/10 bg-black/45 p-3">
+                  <p className="text-xl font-black leading-tight text-white sm:text-2xl">Apa tujuan mereka?</p>
+                  <ul className="mt-2 space-y-1.5 text-[12px] font-semibold text-white/78">
+                    <li>1. Mereka maunya apa?</li>
+                    <li>2. Pengen ada di posisi yang gimana?</li>
+                    <li>3. Mimpinya pengen jadi siapa?</li>
+                    <li>4. Akhirnya pengen jadi orang seperti apa?</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <h3 className="mt-3 text-2xl font-black leading-tight sm:text-4xl">{activeCard.title || "Bikin Konten Viral Pake A.I"}</h3>
+            <p className="mt-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/65">{activeCard.desc || "Materi dimulai dari fondasi supaya konten kamu punya arah dan tujuan yang jelas."}</p>
           </motion.article>
-        ))}
+
+          <motion.aside
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.38, delay: 0.06 }}
+            className="space-y-2"
+          >
+            {lockedCards.map((item, idx) => {
+              const cardIndex = idx + 3;
+              const isActive = activeIndex === cardIndex;
+              return (
+              <button
+                key={item.title}
+                type="button"
+                onClick={() => setActiveIndex(cardIndex)}
+                className={cn(
+                  "w-full rounded-xl border bg-card px-3 py-2.5 text-left transition-colors dark:bg-white/[0.03]",
+                  isActive
+                    ? "border-primary/35 bg-primary/10"
+                    : "border-border hover:border-primary/30 dark:border-white/10",
+                )}
+                aria-pressed={isActive}
+              >
+                <p className="flex items-center gap-2 text-[12px] font-semibold text-muted-foreground dark:text-white/72">
+                  <Lock className="h-3.5 w-3.5 text-primary" />
+                  {item.title}
+                </p>
+                <p className="mt-1 text-[10px] font-semibold text-muted-foreground/80 dark:text-white/42">Locked</p>
+              </button>
+            );})}
+            <div className="rounded-xl border border-border bg-card px-3 py-2.5 text-[12px] font-black text-primary dark:border-white/10 dark:bg-white/[0.03]">
+              +30 more parts
+            </div>
+          </motion.aside>
+        </div>
       </div>
       <p className="mt-4 text-center text-[11px] font-semibold leading-relaxed text-muted-foreground dark:text-white/62">
         {content.section5Note ?? "Teaser aja — harga & detail dibuka di dalam setelah daftar. CTA tetap Daftar GRATIS, jangan ada tombol beli di home. Item lain tampil di dalam setelah daftar."}
@@ -701,25 +816,36 @@ function StoreTeaserSection({ registerUrl, content }: { registerUrl: string; con
 function FreeFirstSection({ content }: { content: LandingContent }) {
   const freeItems = content.section6FreeItems?.length ? content.section6FreeItems : [...freeFirstItems];
   const upgradeRows = content.section6UpgradeItems?.length ? content.section6UpgradeItems : [...upgradeItems];
+  const bonusCards = [...freeItems, ...upgradeRows].slice(0, 3);
   return (
     <LandingSection eyebrow="Gratis Duluan" title={content.section6Title ?? "SEGINI BANYAK YANG KAMU DAPET — GRATIS DULUAN"} subtitle="">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <article className="rounded-2xl border border-primary/30 bg-primary/10 p-4">
-          <h3 className="text-sm font-black text-primary">{content.section6FreeTitle ?? "🎁 Mulai GRATIS, langsung dapat:"}</h3>
-          <div className="mt-3 space-y-2">
-            {freeItems.map((item) => (
-              <p key={item} className="text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/68">{item}</p>
-            ))}
-          </div>
-        </article>
-        <article className="rounded-2xl border border-yellow-500/35 bg-yellow-500/10 p-4 dark:border-yellow-400/35 dark:bg-yellow-400/10">
-          <h3 className="text-sm font-black text-yellow-700 dark:text-yellow-300">{content.section6UpgradeTitle ?? "🚀 Makin lengkap pas kamu siap upgrade:"}</h3>
-          <div className="mt-3 space-y-2">
-            {upgradeRows.map((item) => (
-              <p key={item} className="text-[12px] font-semibold leading-relaxed text-yellow-800/90 dark:text-yellow-100">{item}</p>
-            ))}
-          </div>
-        </article>
+      <div className="space-y-3">
+        {bonusCards.map((item, idx) => (
+          <motion.article
+            key={item}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.4, delay: idx * 0.05 }}
+            className="rounded-2xl border border-border bg-card p-4 dark:border-white/10 dark:bg-white/[0.045]"
+          >
+            <div className={cn("grid gap-3 sm:items-center", idx % 2 === 0 ? "sm:grid-cols-[1fr_0.95fr]" : "sm:grid-cols-[0.95fr_1fr]") }>
+              <div className={cn(idx % 2 === 0 ? "sm:order-1" : "sm:order-2")}>
+                <p className="text-5xl font-black leading-none text-accent">{String(idx + 1).padStart(2, "0")}</p>
+                <h3 className="mt-2 text-2xl font-black leading-tight sm:text-3xl">{item}</h3>
+                <p className="mt-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/66">
+                  Fasilitas ini aktif setelah gabung member, biar kamu bisa langsung praktik dan jalan lebih cepat.
+                </p>
+                <span className="mt-3 inline-flex rounded-full border border-primary/35 bg-primary/12 px-3 py-1 text-[10px] font-black text-primary">
+                  Senilai benefit premium
+                </span>
+              </div>
+              <div className={cn("relative overflow-hidden rounded-xl border border-border bg-[linear-gradient(145deg,rgba(0,200,83,0.15),rgba(255,215,0,0.1)_50%,rgba(8,10,9,0.94)_100%)] p-2 dark:border-white/10", idx % 2 === 0 ? "sm:order-2" : "sm:order-1")}>
+                <div className="aspect-[16/9] rounded-lg border border-white/10 bg-black/40" />
+              </div>
+            </div>
+          </motion.article>
+        ))}
       </div>
     </LandingSection>
   );
@@ -779,14 +905,30 @@ function StartNowSection({ registerUrl, content }: { registerUrl: string; conten
     "✅ Mau lebih lengkap? Bisa upgrade kapan aja — santai, opsional",
   ];
   return (
-    <LandingSection eyebrow="Mulai Sekarang" title={content.section10Title ?? "MULAI GRATIS SEKARANG, JANGAN NUNGGU NANTI"} subtitle={content.section10Subtitle ?? "Mulai dari GRATIS. Nggak perlu modal, daftar cukup pakai nomor HP."}>
-      <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-card p-4 text-left dark:border-white/10 dark:bg-white/[0.045]">
-        <div className="space-y-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/66">
-          {rows.map((item) => <p key={item}>{item}</p>)}
-        </div>
-        <div className="mt-4 flex justify-center sm:justify-start">
-          <Link to={registerUrl} className="rounded-full bg-primary px-5 py-2.5 text-xs font-black text-black">{content.section10Cta ?? "Mulai GRATIS Sekarang"}</Link>
-        </div>
+    <LandingSection eyebrow="Penawaran Hari Ini" title={content.section10Title ?? "MULAI GRATIS SEKARANG, JANGAN NUNGGU NANTI"} subtitle={content.section10Subtitle ?? "Mulai dari GRATIS. Nggak perlu modal, daftar cukup pakai nomor HP."}>
+      <div className="mx-auto grid max-w-5xl gap-3 sm:grid-cols-[1.15fr_0.85fr]">
+        <article className="rounded-2xl border border-border bg-card p-4 text-left dark:border-white/10 dark:bg-white/[0.045]">
+          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">Take action sebelum harga naik</p>
+          <p className="mt-2 text-base font-black leading-tight sm:text-lg">Bonus kamu kebuka kalau join sekarang</p>
+          <div className="mt-3 space-y-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/66">
+            {rows.map((item) => <p key={item}>{item}</p>)}
+          </div>
+          <div className="mt-4 flex justify-start">
+            <Link to={registerUrl} className="rounded-full bg-primary px-5 py-2.5 text-xs font-black text-black">{content.section10Cta ?? "Mulai GRATIS Sekarang"}</Link>
+          </div>
+        </article>
+
+        <article className="rounded-2xl border border-primary/30 bg-[linear-gradient(155deg,rgba(0,200,83,0.16),rgba(255,215,0,0.11)_55%,rgba(8,10,9,0.92)_100%)] p-4 text-left shadow-[0_20px_60px_-36px_rgba(0,200,83,0.65)] dark:border-primary/40">
+          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">Akses Premium</p>
+          <p className="mt-2 text-2xl font-black leading-none text-yellow-300">{content.proPlanPrice ?? "Rp 145.000"}</p>
+          <p className="mt-1 text-[11px] font-semibold text-white/65">sekali bayar untuk mulai lebih cepat</p>
+          <div className="mt-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-[10px] font-semibold text-white/68">
+            Free tetap tersedia. Paket premium opsional untuk akses lebih lengkap dan ritme belajar lebih cepat.
+          </div>
+          <Link to={registerUrl} className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-xs font-black text-black">
+            {content.section10Cta ?? "Mulai GRATIS Sekarang"}
+          </Link>
+        </article>
       </div>
     </LandingSection>
   );
@@ -817,12 +959,14 @@ function CycleCard({ icon: Icon, label, text }: { icon: LucideIcon; label: strin
 
 function InfoCard({ icon: Icon, title, desc }: { icon: LucideIcon; title: string; desc: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-3 shadow-sm dark:border-white/10 dark:bg-white/[0.045]">
-      <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/15 text-primary">
+    <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm dark:border-white/10 dark:bg-white/[0.045] sm:block">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
         <Icon className="h-4 w-4" />
       </span>
-      <h3 className="mt-3 text-xs font-black">{title}</h3>
-      <p className="mt-1 text-[10px] font-semibold leading-snug text-muted-foreground dark:text-white/45">{desc}</p>
+      <div className="min-w-0 sm:mt-3">
+        <h3 className="text-xs font-black">{title}</h3>
+        <p className="mt-1 text-[10px] font-semibold leading-snug text-muted-foreground dark:text-white/45">{desc}</p>
+      </div>
     </div>
   );
 }
@@ -988,7 +1132,7 @@ function FaqSection({ content }: { content: LandingContent }) {
 
   return (
     <section className="border-t border-border bg-muted/35 dark:border-white/10 dark:bg-[#070707]">
-      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-18 lg:px-8 lg:py-20">
         <div className="relative overflow-hidden rounded-[26px] border border-border bg-card/95 p-3 shadow-[0_22px_70px_-30px_rgba(15,23,42,0.65)] dark:border-white/10 dark:bg-[#030303] sm:p-6 lg:p-8">
           <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[radial-gradient(circle,hsl(var(--primary)/0.22)_0%,transparent_66%)] blur-2xl" />
           <div className="pointer-events-none absolute -bottom-28 -left-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,hsl(var(--accent)/0.22)_0%,transparent_66%)] blur-2xl" />
