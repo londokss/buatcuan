@@ -672,51 +672,49 @@ function ThreeStepsSection({ content }: { content: LandingContent }) {
 
   return (
     <LandingSection eyebrow="3 Langkah" title={content.section4Title ?? "CUMA 3 LANGKAH, LANGSUNG JALAN"} subtitle="">
-      <div className="relative mt-1">
-        <div className="pointer-events-none absolute bottom-4 left-[1.125rem] top-4 w-px bg-border/70 dark:bg-white/15 sm:left-1/2 sm:-translate-x-1/2" />
+      <div className="relative mt-2 overflow-hidden rounded-3xl border border-border bg-[radial-gradient(circle_at_15%_20%,rgba(0,200,83,0.12),transparent_38%),radial-gradient(circle_at_85%_75%,rgba(255,215,0,0.08),transparent_36%),linear-gradient(180deg,rgba(9,14,12,0.96),rgba(6,10,8,0.98))] p-4 dark:border-white/10 sm:p-6">
+        <div className="pointer-events-none absolute bottom-6 left-[1.2rem] top-6 w-px bg-primary/35 sm:left-1/2 sm:-translate-x-1/2" />
 
-        <div className="space-y-4 sm:space-y-7">
-        {cards.map((item, index) => (
-          <motion.article
-            key={item.title}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.42, delay: index * 0.08 }}
-            className="grid grid-cols-[auto_1fr] items-center gap-3 sm:grid-cols-[1fr_auto_1fr] sm:gap-4"
-          >
-            <div className="relative z-10">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-primary/45 bg-[linear-gradient(145deg,rgba(0,200,83,0.26),rgba(18,19,18,0.95))] text-[12px] font-black text-primary shadow-[0_0_22px_rgba(0,200,83,0.22)]">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-            </div>
+        <div className="space-y-6 sm:space-y-10">
+          {cards.map((item, index) => {
+            const Icon = stepIcons[index % stepIcons.length];
+            return (
+              <motion.article
+                key={item.title}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ duration: 0.45, delay: index * 0.08 }}
+                className="grid grid-cols-[auto_1fr] items-center gap-4 sm:min-h-[250px] sm:grid-cols-[1fr_auto_1fr] sm:gap-6"
+              >
+                <span className="relative z-10 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-primary/60 bg-[linear-gradient(145deg,rgba(0,200,83,0.35),rgba(12,15,13,0.98))] text-[13px] font-black text-primary shadow-[0_0_26px_rgba(0,200,83,0.28)]">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
 
-            <div
-              className={cn(
-                "rounded-2xl border border-border bg-card p-4 shadow-sm transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-white/[0.045]",
-                index % 2 === 0 ? "sm:col-start-1" : "sm:col-start-3",
-              )}
-            >
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">STEP {index + 1}</p>
-              <h3 className="mt-2 text-sm font-black sm:text-base">{item.title}</h3>
-              <p className="mt-2 text-[12px] font-semibold leading-relaxed text-muted-foreground dark:text-white/65">{item.desc}</p>
-            </div>
+                <div
+                  className={cn(
+                    "rounded-2xl border border-primary/25 bg-black/35 p-4 sm:p-5",
+                    index % 2 === 0 ? "sm:col-start-1" : "sm:col-start-3",
+                  )}
+                >
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-primary/90">STEP {index + 1}</p>
+                  <h3 className="mt-2 text-base font-black leading-tight text-white sm:text-[1.7rem]">{item.title}</h3>
+                  <p className="mt-3 text-[12px] font-semibold leading-relaxed text-white/78 sm:text-[13px]">{item.desc}</p>
+                </div>
 
-            <div
-              className={cn(
-                "hidden h-[132px] rounded-2xl border border-border bg-[radial-gradient(circle_at_30%_25%,rgba(0,200,83,0.2),transparent_55%),linear-gradient(145deg,rgba(12,14,13,0.94),rgba(8,10,9,0.98))] p-3 dark:border-white/10 sm:block",
-                index % 2 === 0 ? "sm:col-start-3" : "sm:col-start-1",
-              )}
-            >
-              <div className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-black/30">
-                {(() => {
-                  const Icon = stepIcons[index % stepIcons.length];
-                  return <Icon className="h-9 w-9 text-primary/90" />;
-                })()}
-              </div>
-            </div>
-          </motion.article>
-        ))}
+                <div
+                  className={cn(
+                    "hidden rounded-2xl border border-primary/25 bg-[radial-gradient(circle_at_35%_30%,rgba(0,200,83,0.28),transparent_58%),linear-gradient(150deg,rgba(17,22,20,0.96),rgba(7,9,8,0.98))] p-4 sm:block",
+                    index % 2 === 0 ? "sm:col-start-3" : "sm:col-start-1",
+                  )}
+                >
+                  <div className="flex h-[168px] items-center justify-center rounded-xl border border-white/10 bg-black/35">
+                    <Icon className="h-12 w-12 text-primary/90" />
+                  </div>
+                </div>
+              </motion.article>
+            );
+          })}
         </div>
       </div>
     </LandingSection>
