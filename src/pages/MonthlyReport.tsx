@@ -4,7 +4,7 @@ import { formatIDR, useApp } from "@/context/AppContext";
 
 const MonthlyReport = () => {
   const { user } = useApp();
-  const completed = user?.completedLessons.length ?? 0;
+  const completed = user?.completedLessons?.length ?? 0;
 
   return (
     <div className="space-y-5 pb-3">

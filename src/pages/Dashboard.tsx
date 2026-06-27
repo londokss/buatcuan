@@ -53,12 +53,13 @@ const Dashboard = () => {
   const { data: affiliate } = useQuery({ queryKey: ["affiliate-summary"], queryFn: api.affiliate.summary });
   const { data: dailyPlan } = useQuery({ queryKey: ["daily-plan"], queryFn: api.dailyPlan.get });
   if (!user) return null;
+  const completedLessons = Array.isArray(user.completedLessons) ? user.completedLessons : [];
 
-  const selesai = user.completedLessons.length;
+  const selesai = completedLessons.length;
   const total = lessons.length;
   const persen = total ? Math.round((selesai / total) * 100) : 0;
   const aksesPro = Boolean(user.membershipActive);
-  const pelajaranBerikutnya = getNextLesson(lessons, user.completedLessons, aksesPro);
+  const pelajaranBerikutnya = getNextLesson(lessons, completedLessons, aksesPro);
   const pelajaranSaya = lessons.filter((lesson) => !lesson.isMembershipLocked).slice(0, 6);
   const komisiSekarang = Math.round(Number(affiliate?.commissionRate ?? (aksesPro ? 0.5 : 0.1)) * 100);
   const komisiPro = Math.round(Number(affiliate?.nextCommissionRate ?? 0.5) * 100);

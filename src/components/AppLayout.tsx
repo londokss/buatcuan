@@ -31,7 +31,7 @@ const AppLayout = () => {
   if (!user) return <Navigate to="/login" replace />;
   if (user.role === "admin") return <Navigate to="/admin" replace />;
   const showNavigation = true;
-  const firstName = user.name.trim().split(/\s+/)[0] || "Anggota";
+  const firstName = (typeof user.name === "string" ? user.name.trim() : "").split(/\s+/)[0] || "Anggota";
   const unreadCount = notificationMeta?.unreadCount ?? 0;
   const tabs = [
     { to: "/app", icon: Home, label: "Beranda", end: true },

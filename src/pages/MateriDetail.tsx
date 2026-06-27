@@ -100,11 +100,13 @@ const MateriDetail = () => {
     );
   }
 
-  const done = user?.completedLessons.includes(lesson.id);
+  const completedLessons = user?.completedLessons ?? [];
+
+  const done = completedLessons.includes(lesson.id);
   const membershipBlocked = Boolean(lesson.isMembershipLocked ?? (!user?.membershipActive && lesson.requiredMembership === "PRO"));
   const nextLesson = getNextLessonAfterCurrent(sortedLessons, lesson.id);
   const sequentialBlocked =
-    Boolean(user?.membershipActive && !membershipBlocked && !done && lessons.length > 0 && !isSequentiallyAvailable(lessons, lesson.id, user.completedLessons));
+    Boolean(user?.membershipActive && !membershipBlocked && !done && lessons.length > 0 && !isSequentiallyAvailable(lessons, lesson.id, completedLessons));
   const copyShare = async () => {
     if (!lesson.shareUrl) return;
     await navigator.clipboard.writeText(lesson.shareUrl);
