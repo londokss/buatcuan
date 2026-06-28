@@ -31,12 +31,13 @@ export function ManagedUsageVideoCard({ targetPath, fallback, className, accentC
     staleTime: 60_000,
   });
 
-  const video = data?.items[0];
+  const items = Array.isArray(data?.items) ? data.items : [];
+  const video = items[0];
   const content: UsageVideoFallback & Partial<UsageVideoDto> = video ?? fallback;
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
   const viewerItems = useMemo<VerticalMediaItem[]>(() => {
-    const source = data?.items.length ? data.items : content.videoUrl ? [content] : [];
+    const source = items.length ? items : content.videoUrl ? [content] : [];
     return source
       .filter((item) => item.videoUrl)
       .map((item, itemIndex) => ({
@@ -56,7 +57,7 @@ export function ManagedUsageVideoCard({ targetPath, fallback, className, accentC
           "Ikuti instruksi di video sebelum memakai fitur.",
         ],
       }));
-  }, [content, data?.items, targetPath]);
+  }, [content, items, targetPath]);
   const canOpenViewer = viewerItems.length > 0;
   const previewVideoUrl = content.videoUrl ? assetUrl(content.videoUrl) : "";
   const openViewer = () => {
@@ -65,7 +66,7 @@ export function ManagedUsageVideoCard({ targetPath, fallback, className, accentC
     setViewerOpen(true);
   };
 
-  if (data?.hasConfigured && data.items.length === 0) return null;
+  if (data?.hasConfigured && items.length === 0) return null;
 
   return (
     <section className={cn("relative overflow-hidden rounded-2xl border border-border bg-card", className)}>

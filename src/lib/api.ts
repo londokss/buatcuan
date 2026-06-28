@@ -1514,12 +1514,16 @@ export const api = {
     const query = search.toString();
     return request<LandingContent>(`/landing${query ? `?${query}` : ""}`);
   },
-  usageVideos: (targetPath?: string) => {
-    if (LOCAL_MODE) return Promise.resolve({ items: [], hasConfigured: false });
+  usageVideos: async (targetPath?: string) => {
+    if (LOCAL_MODE) return { items: [], hasConfigured: false };
     const search = new URLSearchParams();
     if (targetPath) search.set("targetPath", targetPath);
     const query = search.toString();
-    return request<{ items: UsageVideoDto[]; hasConfigured: boolean }>(`/usage-videos${query ? `?${query}` : ""}`);
+    const data = await request<{ items?: UsageVideoDto[]; hasConfigured?: boolean }>(`/usage-videos${query ? `?${query}` : ""}`);
+    return {
+      items: ensureArray<UsageVideoDto>(data?.items),
+      hasConfigured: Boolean(data?.hasConfigured),
+    };
   },
   lessons: {
     list: async (category?: string) => {
