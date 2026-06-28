@@ -1,5 +1,6 @@
 const API_BASE_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:4001/api").replace(/\/+$/, "");
 const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, "");
+const LOCAL_MODE = import.meta.env.VITE_LOCAL_MODE === "true";
 
 export interface ApiUser {
   id: string;
@@ -1067,6 +1068,129 @@ export const authStorage = {
   },
 };
 
+type LocalAuthUserRecord = ApiUser & { password: string };
+
+const LOCAL_USERS_KEY = "buatcuan:local:users";
+const LOCAL_REFERRAL_FALLBACK = "080000000000";
+
+function normalizePhoneLookup(value: string) {
+  const digits = String(value || "").replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("62")) return digits;
+  if (digits.startsWith("0")) return `62${digits.slice(1)}`;
+  return digits;
+}
+
+function localNowIso() {
+  return new Date().toISOString();
+}
+
+function localDefaultUser(input: { id: string; name: string; wa: string; role?: string; password: string; membershipActive?: boolean }): LocalAuthUserRecord {
+  const wa = normalizePhoneLookup(input.wa);
+  const role = input.role ?? "member";
+  const joinedAt = localNowIso();
+  return {
+    id: input.id,
+    name: input.name,
+    avatarUrl: null,
+    wa,
+    referral: LOCAL_REFERRAL_FALLBACK,
+    myRefCode: `REF${wa.slice(-6) || input.id.slice(-4)}`,
+    role,
+    membershipActive: Boolean(input.membershipActive),
+    membershipTier: input.membershipActive ? "PRO" : "FREE",
+    accountStatus: "active",
+    membershipExpiry: input.membershipActive ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() : "",
+    autoRenewMembership: false,
+    personalBrandHandle: null,
+    personalBrandTagline: null,
+    personalBrandStatus: null,
+    nameLastChangedAt: null,
+    nameCanChangeAt: null,
+    joinedAt,
+    balance: 0,
+    level: input.membershipActive ? "Intermediate" : "Beginner",
+    completedLessons: [],
+    password: input.password,
+  };
+}
+
+function localSeedUsers() {
+  return [
+    localDefaultUser({
+      id: "local-admin-1",
+      name: "Admin BuatCuan",
+      wa: "628000000001",
+      role: "admin",
+      password: "admin12345",
+      membershipActive: true,
+    }),
+    localDefaultUser({
+      id: "local-member-1",
+      name: "Member Demo",
+      wa: "628000000002",
+      role: "member",
+      password: "member12345",
+      membershipActive: false,
+    }),
+  ];
+}
+
+function localGetUsers() {
+  if (typeof window === "undefined") return localSeedUsers();
+  const raw = localStorage.getItem(LOCAL_USERS_KEY);
+  if (!raw) {
+    const seed = localSeedUsers();
+    localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(seed));
+    return seed;
+  }
+  try {
+    const parsed = JSON.parse(raw) as LocalAuthUserRecord[];
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      const seed = localSeedUsers();
+      localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(seed));
+      return seed;
+    }
+    return parsed;
+  } catch {
+    const seed = localSeedUsers();
+    localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(seed));
+    return seed;
+  }
+}
+
+function localSaveUsers(users: LocalAuthUserRecord[]) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
+}
+
+function localToApiUser(user: LocalAuthUserRecord): ApiUser {
+  const { password: _password, ...rest } = user;
+  return rest;
+}
+
+function localFindUserByToken(token: string) {
+  const prefix = "local-token:";
+  if (!token.startsWith(prefix)) return null;
+  const userId = token.slice(prefix.length).split(":")[0] ?? "";
+  if (!userId) return null;
+  return localGetUsers().find((item) => item.id === userId) ?? null;
+}
+
+function localTokenForUser(user: Pick<ApiUser, "id">) {
+  return `local-token:${user.id}:${Date.now()}`;
+}
+
+function localFallbackReferralMeta() {
+  return {
+    id: "local-ref-default",
+    name: "Tim BuatCuan",
+    wa: LOCAL_REFERRAL_FALLBACK,
+    referralCode: "DEFAULT",
+    publicIdentifier: LOCAL_REFERRAL_FALLBACK,
+  };
+}
+
 async function parseJson<T>(response: Response) {
   const text = await response.text();
   if (!text) return null;
@@ -1188,46 +1312,200 @@ export function createNotificationEventSource() {
   return new EventSource(`${API_BASE_URL}/notifications/stream?token=${encodeURIComponent(token)}`);
 }
 
+function ensureArray<T>(value: unknown): T[] {
+  if (Array.isArray(value)) return value as T[];
+  if (value && typeof value === "object" && Array.isArray((value as { items?: unknown[] }).items)) {
+    return (value as { items: T[] }).items;
+  }
+  return [];
+}
+
 export const api = {
   auth: {
     login: (payload: { wa: string; password: string }) =>
-      request<{ token: string; user: ApiUser }>("/auth/login", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+      LOCAL_MODE
+        ? new Promise<{ token: string; user: ApiUser }>((resolve, reject) => {
+            const users = localGetUsers();
+            const wa = normalizePhoneLookup(payload.wa);
+            const matched = users.find((item) => normalizePhoneLookup(item.wa) === wa);
+            if (!matched || matched.password !== payload.password) {
+              reject(new ApiError({ code: "AUTH_INVALID_CREDENTIALS", message: "Cek lagi nomor telepon dan password kamu.", statusCode: 401 }));
+              return;
+            }
+            resolve({ token: localTokenForUser(matched), user: localToApiUser(matched) });
+          })
+        : request<{ token: string; user: ApiUser }>("/auth/login", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          }),
     register: (payload: { name: string; wa: string; password: string; referralCode?: string; termsAccepted: boolean }) =>
-      request<{ token: string; user: ApiUser }>("/auth/register", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
-    me: () => request<{ user: ApiUser }>("/auth/me"),
+      LOCAL_MODE
+        ? new Promise<{ token: string; user: ApiUser }>((resolve, reject) => {
+            const wa = normalizePhoneLookup(payload.wa);
+            if (!wa) {
+              reject(new ApiError({ code: "AUTH_INVALID_WA", message: "Nomor WhatsApp tidak valid.", statusCode: 400 }));
+              return;
+            }
+            const users = localGetUsers();
+            if (users.some((item) => normalizePhoneLookup(item.wa) === wa)) {
+              reject(new ApiError({ code: "AUTH_WA_ALREADY_EXISTS", message: "Nomor WhatsApp ini sudah terdaftar.", statusCode: 409 }));
+              return;
+            }
+            const newUser = localDefaultUser({
+              id: `local-member-${Date.now()}`,
+              name: payload.name.trim() || "Member",
+              wa,
+              role: "member",
+              password: payload.password,
+              membershipActive: false,
+            });
+            newUser.referral = payload.referralCode?.trim() || LOCAL_REFERRAL_FALLBACK;
+            localSaveUsers([...users, newUser]);
+            resolve({ token: localTokenForUser(newUser), user: localToApiUser(newUser) });
+          })
+        : request<{ token: string; user: ApiUser }>("/auth/register", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          }),
+    me: () =>
+      LOCAL_MODE
+        ? new Promise<{ user: ApiUser }>((resolve, reject) => {
+            const token = authStorage.getToken();
+            if (!token) {
+              reject(new ApiError({ code: "AUTH_TOKEN_EMPTY", message: "Belum login.", statusCode: 401 }));
+              return;
+            }
+            const fromToken = localFindUserByToken(token);
+            const fromStorage = authStorage.getUser();
+            const user = fromToken ? localToApiUser(fromToken) : fromStorage;
+            if (!user) {
+              reject(new ApiError({ code: "AUTH_USER_NOT_FOUND", message: "Sesi login tidak ditemukan.", statusCode: 401 }));
+              return;
+            }
+            resolve({ user });
+          })
+        : request<{ user: ApiUser }>("/auth/me"),
     updateAccount: (payload: { name?: string; avatarUrl?: string; wa?: string; currentPassword?: string; newPassword?: string }) =>
-      request<{ user: ApiUser }>("/auth/account", {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+      LOCAL_MODE
+        ? new Promise<{ user: ApiUser }>((resolve, reject) => {
+            const token = authStorage.getToken();
+            const active = token ? localFindUserByToken(token) : null;
+            if (!active) {
+              reject(new ApiError({ code: "AUTH_TOKEN_INVALID", message: "Silakan login ulang.", statusCode: 401 }));
+              return;
+            }
+            const users = localGetUsers();
+            const idx = users.findIndex((item) => item.id === active.id);
+            if (idx < 0) {
+              reject(new ApiError({ code: "AUTH_USER_NOT_FOUND", message: "User tidak ditemukan.", statusCode: 404 }));
+              return;
+            }
+            const next = { ...users[idx] };
+            if (payload.newPassword) {
+              if (!payload.currentPassword || payload.currentPassword !== users[idx].password) {
+                reject(new ApiError({ code: "AUTH_PASSWORD_INVALID", message: "Password saat ini tidak sesuai.", statusCode: 400 }));
+                return;
+              }
+              next.password = payload.newPassword;
+            }
+            if (payload.name?.trim()) next.name = payload.name.trim();
+            if (payload.avatarUrl !== undefined) next.avatarUrl = payload.avatarUrl;
+            if (payload.wa?.trim()) {
+              const normalizedWa = normalizePhoneLookup(payload.wa);
+              const isUsed = users.some((item, itemIndex) => itemIndex !== idx && normalizePhoneLookup(item.wa) === normalizedWa);
+              if (isUsed) {
+                reject(new ApiError({ code: "AUTH_WA_ALREADY_EXISTS", message: "Nomor WhatsApp sudah dipakai akun lain.", statusCode: 409 }));
+                return;
+              }
+              next.wa = normalizedWa;
+            }
+            const updated = [...users];
+            updated[idx] = next;
+            localSaveUsers(updated);
+            resolve({ user: localToApiUser(next) });
+          })
+        : request<{ user: ApiUser }>("/auth/account", {
+            method: "PATCH",
+            body: JSON.stringify(payload),
+          }),
     updatePersonalBranding: (payload: { handle?: string; tagline?: string; status?: string }) =>
-      request<{ user: ApiUser }>("/auth/personal-branding", {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+      LOCAL_MODE
+        ? new Promise<{ user: ApiUser }>((resolve, reject) => {
+            const token = authStorage.getToken();
+            const active = token ? localFindUserByToken(token) : null;
+            if (!active) {
+              reject(new ApiError({ code: "AUTH_TOKEN_INVALID", message: "Silakan login ulang.", statusCode: 401 }));
+              return;
+            }
+            const users = localGetUsers();
+            const idx = users.findIndex((item) => item.id === active.id);
+            if (idx < 0) {
+              reject(new ApiError({ code: "AUTH_USER_NOT_FOUND", message: "User tidak ditemukan.", statusCode: 404 }));
+              return;
+            }
+            const next = {
+              ...users[idx],
+              personalBrandHandle: payload.handle ?? users[idx].personalBrandHandle,
+              personalBrandTagline: payload.tagline ?? users[idx].personalBrandTagline,
+              personalBrandStatus: payload.status ?? users[idx].personalBrandStatus,
+            };
+            const updated = [...users];
+            updated[idx] = next;
+            localSaveUsers(updated);
+            resolve({ user: localToApiUser(next) });
+          })
+        : request<{ user: ApiUser }>("/auth/personal-branding", {
+            method: "PATCH",
+            body: JSON.stringify(payload),
+          }),
     deleteAccount: (payload: { currentPassword: string; confirmation: string }) =>
-      request<{ deleted: boolean }>("/auth/account", {
-        method: "DELETE",
-        body: JSON.stringify(payload),
-      }),
+      LOCAL_MODE
+        ? new Promise<{ deleted: boolean }>((resolve, reject) => {
+            const token = authStorage.getToken();
+            const active = token ? localFindUserByToken(token) : null;
+            if (!active) {
+              reject(new ApiError({ code: "AUTH_TOKEN_INVALID", message: "Silakan login ulang.", statusCode: 401 }));
+              return;
+            }
+            if (payload.currentPassword !== active.password) {
+              reject(new ApiError({ code: "AUTH_PASSWORD_INVALID", message: "Password saat ini tidak sesuai.", statusCode: 400 }));
+              return;
+            }
+            if (payload.confirmation.toUpperCase() !== "HAPUS") {
+              reject(new ApiError({ code: "AUTH_CONFIRMATION_INVALID", message: "Ketik HAPUS untuk konfirmasi.", statusCode: 400 }));
+              return;
+            }
+            const users = localGetUsers().filter((item) => item.id !== active.id);
+            localSaveUsers(users);
+            resolve({ deleted: true });
+          })
+        : request<{ deleted: boolean }>("/auth/account", {
+            method: "DELETE",
+            body: JSON.stringify(payload),
+          }),
     requestPasswordReset: (payload: { wa: string }) =>
-      request<{ message: string; requestCode: string; requestExpiresAt: string; adminWa?: string | null; adminWhatsappUrl?: string | null }>("/auth/password-reset/request", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+      LOCAL_MODE
+        ? Promise.resolve({
+            message: "Request reset password dibuat (local mode).",
+            requestCode: `LOCAL-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+            requestExpiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+            adminWa: LOCAL_REFERRAL_FALLBACK,
+            adminWhatsappUrl: `https://wa.me/${LOCAL_REFERRAL_FALLBACK}`,
+          })
+        : request<{ message: string; requestCode: string; requestExpiresAt: string; adminWa?: string | null; adminWhatsappUrl?: string | null }>("/auth/password-reset/request", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          }),
     completePasswordReset: (payload: { token: string; password: string }) =>
-      request<{ message: string; withdrawalLockedUntil?: string }>("/auth/password-reset/complete", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+      LOCAL_MODE
+        ? Promise.resolve({ message: "Password berhasil diubah (local mode).", withdrawalLockedUntil: undefined })
+        : request<{ message: string; withdrawalLockedUntil?: string }>("/auth/password-reset/complete", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          }),
   },
   landing: (params?: { slug?: string; campaign?: string; role?: string; ref?: string }) => {
+    if (LOCAL_MODE) return Promise.resolve({} as LandingContent);
     const search = new URLSearchParams();
     if (params?.slug) search.set("slug", params.slug);
     if (params?.campaign) search.set("campaign", params.campaign);
@@ -1237,14 +1515,18 @@ export const api = {
     return request<LandingContent>(`/landing${query ? `?${query}` : ""}`);
   },
   usageVideos: (targetPath?: string) => {
+    if (LOCAL_MODE) return Promise.resolve({ items: [], hasConfigured: false });
     const search = new URLSearchParams();
     if (targetPath) search.set("targetPath", targetPath);
     const query = search.toString();
     return request<{ items: UsageVideoDto[]; hasConfigured: boolean }>(`/usage-videos${query ? `?${query}` : ""}`);
   },
   lessons: {
-    list: (category?: string) =>
-      request<LessonDto[]>(`/lessons${category ? `?category=${encodeURIComponent(category)}` : ""}`),
+    list: async (category?: string) => {
+      if (LOCAL_MODE) return [];
+      const data = await request<LessonDto[] | { items?: LessonDto[] }>(`/lessons${category ? `?category=${encodeURIComponent(category)}` : ""}`);
+      return ensureArray<LessonDto>(data);
+    },
     detail: (id: string) => request<LessonDto>(`/lessons/${id}`),
     downloadPdf: (id: string) => downloadRequest(`/lessons/${id}/pdf`),
     unlock: (id: string) =>
@@ -1269,7 +1551,26 @@ export const api = {
       }),
   },
   dailyPlan: {
-    get: () => request<DailyPlanDto>("/daily-plan"),
+    get: () =>
+      LOCAL_MODE
+        ? Promise.resolve({
+            date: new Date().toISOString().slice(0, 10),
+            summary: {
+              totalTasks: 0,
+              completedTasks: 0,
+              completionPercent: 0,
+              learnerCompleted: 0,
+              contentCompleted: 0,
+              mentorCompleted: 0,
+              earnedXp: 0,
+              totalXpAvailable: 0,
+              focusText: "Mulai dari satu tugas kecil hari ini.",
+            },
+            nextBestTask: null,
+            tasks: [],
+            week: [],
+          })
+        : request<DailyPlanDto>("/daily-plan"),
     updateTask: (code: string, completed: boolean) =>
       request<DailyPlanDto>(`/daily-plan/tasks/${encodeURIComponent(code)}`, {
         method: "PATCH",
@@ -1306,7 +1607,31 @@ export const api = {
   },
   affiliate: {
     summary: () =>
-      request<{
+      LOCAL_MODE
+        ? Promise.resolve({
+            link: "",
+            code: authStorage.getUser()?.myRefCode ?? "LOCALREF",
+            stats: {
+              totalJoins: 0,
+              active: 0,
+              validReferrals: 0,
+              clicks: 0,
+              registered: 0,
+              paid: 0,
+              registeredUnpaid: 0,
+              commission: 0,
+            },
+            commissionRate: authStorage.getUser()?.membershipActive ? 0.5 : 0.1,
+            mentorStatus: undefined,
+            mentorLevel: undefined,
+            mentorInactiveUntil: null,
+            mentorTermsAcceptedAt: null,
+            nextCommissionRate: 0.5,
+            chartData: [],
+            commissions: [],
+            referrals: [],
+          })
+        : request<{
         link: string;
         code: string;
         stats: {
@@ -1354,16 +1679,55 @@ export const api = {
       request<{ id: string; mentorStatus: MentorStatus; mentorInactiveUntil: string; mentorInactiveReason: string }>("/affiliate/mentor-availability", { method: "PATCH", body: JSON.stringify(payload) }),
     landingPages: () => request<ShareableLandingPageDto[]>("/affiliate/landing-pages"),
     resolveReferral: (referralCode: string) =>
-      request<{
-        validReferral: boolean;
-        fallbackUsed: boolean;
-        requestedReferral: string;
-        referral: { id: string; name: string; wa: string; referralCode: string; publicIdentifier: string } | null;
-      }>(`/affiliate/referral/${encodeURIComponent(referralCode)}`),
+      LOCAL_MODE
+        ? new Promise<{
+            validReferral: boolean;
+            fallbackUsed: boolean;
+            requestedReferral: string;
+            referral: { id: string; name: string; wa: string; referralCode: string; publicIdentifier: string } | null;
+          }>((resolve) => {
+            const requested = referralCode.trim();
+            const requestedNormalized = normalizePhoneLookup(requested) || requested.toUpperCase();
+            const users = localGetUsers();
+            const referralUser = users.find((item) => {
+              const byWa = normalizePhoneLookup(item.wa) === requestedNormalized;
+              const byCode = item.myRefCode.toUpperCase() === requested.toUpperCase();
+              return byWa || byCode;
+            });
+            if (referralUser) {
+              resolve({
+                validReferral: true,
+                fallbackUsed: false,
+                requestedReferral: requested,
+                referral: {
+                  id: referralUser.id,
+                  name: referralUser.name,
+                  wa: referralUser.wa,
+                  referralCode: referralUser.myRefCode,
+                  publicIdentifier: referralUser.wa,
+                },
+              });
+              return;
+            }
+            resolve({
+              validReferral: false,
+              fallbackUsed: true,
+              requestedReferral: requested,
+              referral: localFallbackReferralMeta(),
+            });
+          })
+        : request<{
+            validReferral: boolean;
+            fallbackUsed: boolean;
+            requestedReferral: string;
+            referral: { id: string; name: string; wa: string; referralCode: string; publicIdentifier: string } | null;
+          }>(`/affiliate/referral/${encodeURIComponent(referralCode)}`),
     trackClick: (referralCode: string) =>
-      request<{ tracked: boolean; validReferral?: boolean }>(`/affiliate/referral-click/${encodeURIComponent(referralCode)}`, {
-        method: "POST",
-      }),
+      LOCAL_MODE
+        ? Promise.resolve({ tracked: true, validReferral: true })
+        : request<{ tracked: boolean; validReferral?: boolean }>(`/affiliate/referral-click/${encodeURIComponent(referralCode)}`, {
+            method: "POST",
+          }),
   },
   withdrawals: {
     list: () => request<WithdrawalDto[]>("/withdrawals"),
@@ -1447,8 +1811,31 @@ export const api = {
     },
   },
   notifications: {
-    list: () => request<NotificationsResponse>("/notifications"),
-    unreadCount: () => request<{ unreadCount: number }>("/notifications/unread-count"),
+    list: async () => {
+      const data = await request<NotificationsResponse | NotificationDto[]>("/notifications");
+      if (Array.isArray(data)) {
+        return {
+          items: data,
+          unreadCount: data.filter((item) => !item.read).length,
+        };
+      }
+      return {
+        items: ensureArray<NotificationDto>(data?.items),
+        unreadCount: typeof data?.unreadCount === "number" ? data.unreadCount : 0,
+      };
+    },
+    unreadCount: async () => {
+      if (LOCAL_MODE) return { unreadCount: 0 };
+      try {
+        return await request<{ unreadCount: number }>("/notifications/unread-count");
+      } catch (error) {
+        if (error instanceof ApiError && error.statusCode === 404) {
+          const fallback = await api.notifications.list();
+          return { unreadCount: fallback.unreadCount };
+        }
+        throw error;
+      }
+    },
     markRead: (id: string) => request<{ id: string; read: boolean }>(`/notifications/${encodeURIComponent(id)}/read`, { method: "POST" }),
     markAllRead: () => request<{ count: number }>("/notifications/read-all", { method: "POST" }),
   },
@@ -1463,7 +1850,10 @@ export const api = {
     return request<{ ideas: HookIdeaDto[]; filters: { categories: string[]; niches: string[]; themes: string[] } }>(`/hook-ideas${query ? `?${query}` : ""}`);
   },
   tools: {
-    list: () => request<MemberToolDto[]>("/tools"),
+    list: async () => {
+      const data = await request<MemberToolDto[] | { items?: MemberToolDto[] }>("/tools");
+      return ensureArray<MemberToolDto>(data);
+    },
     detail: (slug: string, params?: { category?: string; niche?: string; theme?: string; q?: string }) => {
       const search = new URLSearchParams();
       if (params?.category && params.category !== "ALL") search.set("category", params.category);
